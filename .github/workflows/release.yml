@@ -39,10 +39,10 @@ jobs:
       -
         name: Create Providers
         run: |
-          wash par create --arch x86_64-macos   --binary dist/tsnet-httpserver_darwin_amd64_v1/kv-go --capid wasmcloud:keyvalue --name "Tailscale HTTPServer (Go)" --vendor jordan-rash --version ${{ github.ref_name }} --revision 1 --destination dist/provider.par.gz
-          wash par insert --arch aarch64-macos  --binary dist/tsnet-httpserver_darwin_arm64/kv-go   dist/provider.par.gz
-          wash par insert --arch x86_64-linux   --binary dist/tsnet-httpserver_linux_amd64_v1/kv-go dist/provider.par.gz
-          wash par insert --arch aarch64-linux  --binary dist/tsnet-httpserver_linux_arm64/kv-go    dist/provider.par.gz
+          wash par create --arch x86_64-macos   --binary dist/tsnet-httpserver_darwin_amd64_v1/tsnet-httpserver --capid wasmcloud:keyvalue --name "Tailscale HTTPServer (Go)" --vendor jordan-rash --version ${{ github.ref_name }} --revision 1 --destination dist/provider.par.gz
+          wash par insert --arch aarch64-macos  --binary dist/tsnet-httpserver_darwin_arm64/tsnet-httpserver   dist/provider.par.gz
+          wash par insert --arch x86_64-linux   --binary dist/tsnet-httpserver_linux_amd64_v1/tsnet-httpserver dist/provider.par.gz
+          wash par insert --arch aarch64-linux  --binary dist/tsnet-httpserver_linux_arm64/tsnet-httpserver    dist/provider.par.gz
       - name: Upload provider archive to GH Actions
         env:
           WASH_REG_USER: jordan-rash
