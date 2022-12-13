@@ -116,7 +116,6 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 					return
 				}
 
-				w.WriteHeader(int(respDecoded.StatusCode))
 				addHeaders(w, headers)
 
 				sURL := strings.Split(r.URL.Path, ".")
@@ -124,10 +123,11 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 				switch end {
 				case "css":
 					p.Logger.Info("Adding CSS header to " + r.URL.Path)
-					w.Header().Set("X-Content-Type", "text/css")
+					w.Header().Set("Content-Type", "text/css")
 					p.Logger.Info(fmt.Sprintf("%v", w.Header()))
 				}
 
+				w.WriteHeader(int(respDecoded.StatusCode))
 				w.Write(respDecoded.Body)
 			},
 		),
