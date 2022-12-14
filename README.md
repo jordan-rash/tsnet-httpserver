@@ -11,5 +11,7 @@ Can be used with any actor that satisfies the `wasmcloud:httpserver` contract
 | hostname   | string | None    | true     |
 | ts_authkey | string | None    | true     |
 
+> Recommended that you use a pre-authorized tailscale key and tag it with "tag:wasmcloud" or something similiar
+
 ### Artifacts
 Usable OCI artifacts can be found in Github Packages (linked in the right hand side bar)
