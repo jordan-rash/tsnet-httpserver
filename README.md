@@ -19,7 +19,8 @@ Once you actor has been successfully linked, you should see the `hostname` appea
 
 At this point, if you are on a machine that is connected to your tailnet, you can visit the IP or URL to see your actor!
 
-![image](https://user-images.githubusercontent.com/15827604/207715468-3f6d0bf7-edb7-4434-8a14-5d77d391a0a3.png)
+<img width="225" alt="Screenshot 2022-12-14 at 2 11 23 PM" src="https://user-images.githubusercontent.com/15827604/207715468-3f6d0bf7-edb7-4434-8a14-5d77d391a0a3.png">
+
 
 ### Artifacts
 Usable OCI artifacts can be found in Github Packages (linked in the right hand side bar)
