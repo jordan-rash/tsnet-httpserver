@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 
 	provider "github.com/wasmCloud/provider-sdk-go"
@@ -20,9 +21,11 @@ import (
 )
 
 var (
-	p  *provider.WasmcloudProvider
-	s  *tsnet.Server
-	ln net.Listener
+	p      *provider.WasmcloudProvider
+	s      *tsnet.Server
+	ln     net.Listener
+	fln    *tsnet.FunnelListener
+	funnel bool = false
 
 	ErrNotImplemented   error = errors.New("operation not implemented")
 	ErrInvalidOperation error = errors.New("operation not valid")
@@ -61,12 +64,13 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 	ts_authkey := linkdef.Values["ts_authkey"]
 	tls_private_key := linkdef.Values["tls_private_key"]
 	tls_cert := linkdef.Values["tls_cert"]
+	with_funnel := linkdef.Values["funnel"]
 
 	if port == "" || hostname == "" || ts_authkey == "" {
 		return errors.New("invalid link settings")
 	}
 
-	if tls_cert != "" && tls_private_key != "" {
+	if tls_cert != "" && tls_private_key != "" && with_funnel != "true" {
 		func() {
 			tlsCertDec, err := base64.StdEncoding.DecodeString(tls_cert)
 			if err != nil {
@@ -92,17 +96,28 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 		Hostname: hostname,
 		AuthKey:  ts_authkey,
 	}
-
-	ln, err = s.Listen("tcp", ":"+port)
+	funnel, err := strconv.ParseBool(with_funnel)
 	if err != nil {
-		log.Fatal(err)
+		p.Logger.Error(err, "Failed to parse funnel input")
 	}
 
-	if useTLS {
-		ln = tls.NewListener(ln, &tls.Config{
-			Certificates: []tls.Certificate{clientCert},
-			RootCAs:      x509.NewCertPool(),
-		})
+	if funnel {
+		fln, err = s.ExposeHTTPS()
+		if err != nil {
+			log.Fatal(err)
+		}
+		funnel = true
+	} else {
+		ln, err = s.Listen("tcp", ":"+port)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if useTLS {
+			ln = tls.NewListener(ln, &tls.Config{
+				Certificates: []tls.Certificate{clientCert},
+				RootCAs:      x509.NewCertPool(),
+			})
+		}
 	}
 
 	// Init authentication
@@ -191,7 +206,11 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 }
 
 func handleDelLink(_ core.LinkDefinition) error {
-	ln.Close()
+	if funnel {
+		fln.Close()
+	} else {
+		ln.Close()
+	}
 	return s.Close()
 }
 
