@@ -64,13 +64,16 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 	ts_authkey := linkdef.Values["ts_authkey"]
 	tls_private_key := linkdef.Values["tls_private_key"]
 	tls_cert := linkdef.Values["tls_cert"]
-	with_funnel := linkdef.Values["funnel"]
+	funnel, err := strconv.ParseBool(linkdef.Values["funnel"])
+	if err != nil {
+		p.Logger.Error(err, "Failed to parse funnel input")
+	}
 
 	if port == "" || hostname == "" || ts_authkey == "" {
 		return errors.New("invalid link settings")
 	}
 
-	if tls_cert != "" && tls_private_key != "" && with_funnel != "true" {
+	if tls_cert != "" && tls_private_key != "" && !funnel {
 		func() {
 			tlsCertDec, err := base64.StdEncoding.DecodeString(tls_cert)
 			if err != nil {
@@ -96,9 +99,10 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 		Hostname: hostname,
 		AuthKey:  ts_authkey,
 	}
-	funnel, err := strconv.ParseBool(with_funnel)
+
+	lc, err := s.LocalClient()
 	if err != nil {
-		p.Logger.Error(err, "Failed to parse funnel input")
+		log.Fatal(err)
 	}
 
 	if funnel {
@@ -106,7 +110,9 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 		if err != nil {
 			log.Fatal(err)
 		}
-		funnel = true
+		ln = tls.NewListener(fln.Listener, &tls.Config{
+			GetCertificate: lc.GetCertificate,
+		})
 	} else {
 		ln, err = s.Listen("tcp", ":"+port)
 		if err != nil {
@@ -118,12 +124,6 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 				RootCAs:      x509.NewCertPool(),
 			})
 		}
-	}
-
-	// Init authentication
-	lc, err := s.LocalClient()
-	if err != nil {
-		log.Fatal(err)
 	}
 
 	return http.Serve(ln,
@@ -208,9 +208,8 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 func handleDelLink(_ core.LinkDefinition) error {
 	if funnel {
 		fln.Close()
-	} else {
-		ln.Close()
 	}
+	ln.Close()
 	return s.Close()
 }
 
