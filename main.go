@@ -26,6 +26,7 @@ var (
 	ln     net.Listener
 	fln    *tsnet.FunnelListener
 	funnel bool = false
+	useTLS bool = false
 
 	ErrNotImplemented   error = errors.New("operation not implemented")
 	ErrInvalidOperation error = errors.New("operation not valid")
@@ -56,7 +57,6 @@ func healthCheckMsg() string {
 
 func handleNewLink(linkdef core.LinkDefinition) error {
 	var err error
-	var useTLS = false
 	var clientCert tls.Certificate
 
 	port := linkdef.Values["port"]
@@ -64,9 +64,11 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 	ts_authkey := linkdef.Values["ts_authkey"]
 	tls_private_key := linkdef.Values["tls_private_key"]
 	tls_cert := linkdef.Values["tls_cert"]
-	funnel, err := strconv.ParseBool(linkdef.Values["funnel"])
-	if err != nil {
-		p.Logger.Error(err, "Failed to parse funnel input")
+	if linkdef.Values["funnel"] != "" {
+		funnel, err = strconv.ParseBool(linkdef.Values["funnel"])
+		if err != nil {
+			p.Logger.Error(err, "Failed to parse funnel input")
+		}
 	}
 
 	if port == "" || hostname == "" || ts_authkey == "" {
@@ -90,7 +92,6 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 				p.Logger.Error(err, "Failed to create x509 key pair")
 				return
 			}
-			port = "443"
 			useTLS = true
 		}()
 	}
@@ -110,7 +111,13 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 		if err != nil {
 			log.Fatal(err)
 		}
-		ln = tls.NewListener(fln.Listener, &tls.Config{
+
+		lln, err := s.Listen("tcp", ":443")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		ln = tls.NewListener(lln, &tls.Config{
 			GetCertificate: lc.GetCertificate,
 		})
 	} else {
@@ -195,6 +202,9 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 				switch end {
 				case "css":
 					w.Header().Set("Content-Type", "text/css")
+					p.Logger.Info(fmt.Sprintf("%v", w.Header()))
+				case "js":
+					w.Header().Set("Content-Type", "application/javascript")
 					p.Logger.Info(fmt.Sprintf("%v", w.Header()))
 				}
 
