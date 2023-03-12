@@ -18,13 +18,13 @@ import (
 	httpserver "github.com/wasmcloud/interfaces/httpserver/tinygo"
 
 	"tailscale.com/tsnet"
+	"tailscale.com/types/logger"
 )
 
 var (
 	p      *provider.WasmcloudProvider
 	s      *tsnet.Server
 	ln     net.Listener
-	fln    *tsnet.FunnelListener
 	funnel bool = false
 	useTLS bool = false
 
@@ -99,6 +99,7 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 	s = &tsnet.Server{
 		Hostname: hostname,
 		AuthKey:  ts_authkey,
+		Logf:     logger.Discard,
 	}
 
 	lc, err := s.LocalClient()
@@ -107,19 +108,10 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 	}
 
 	if funnel {
-		fln, err = s.ExposeHTTPS()
+		ln, err = s.ListenFunnel("tcp", ":443")
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		lln, err := s.Listen("tcp", ":443")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		ln = tls.NewListener(lln, &tls.Config{
-			GetCertificate: lc.GetCertificate,
-		})
 	} else {
 		ln, err = s.Listen("tcp", ":"+port)
 		if err != nil {
@@ -216,9 +208,6 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 }
 
 func handleDelLink(_ core.LinkDefinition) error {
-	if funnel {
-		fln.Close()
-	}
 	ln.Close()
 	return s.Close()
 }
