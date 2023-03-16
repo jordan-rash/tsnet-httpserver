@@ -10,6 +10,7 @@ Can be used with any actor that satisfies the `wasmcloud:httpserver` contract
 | port       | int    | None    | true     |
 | hostname   | string | None    | true     |
 | ts_authkey | string | None    | true     |
+| funnel     | bool   | false   | false    |
 
 > Recommended that you use a pre-authorized tailscale key and tag it with "tag:wasmcloud" or something similiar
 
