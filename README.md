@@ -13,6 +13,8 @@ Can be used with any actor that satisfies the `wasmcloud:httpserver` contract
 | funnel     | bool   | false   | false    |
 
 > Recommended that you use a pre-authorized tailscale key and tag it with "tag:wasmcloud" or something similiar
+>
+> In order for funnel to work, you must ensure the [nodeAttr](https://tailscale.com/kb/1223/tailscale-funnel/#node-attribute-required) is set 
 
 Once you actor has been successfully linked, you should see the `hostname` appear in your Tailscale admin console.
 
