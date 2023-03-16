@@ -7,7 +7,7 @@ require (
 	github.com/wasmcloud/interfaces/core/tinygo v0.0.0-20221212211611-51d99ad3427c
 	github.com/wasmcloud/interfaces/httpserver/tinygo v0.0.0-20221212211611-51d99ad3427c
 	github.com/wasmcloud/tinygo-msgpack v0.1.4
-	tailscale.com v1.1.1-0.20230311211257-958c89470bff
+	tailscale.com v1.1.1-0.20230316024922-f34590d9ed34
 )
 
 require (
