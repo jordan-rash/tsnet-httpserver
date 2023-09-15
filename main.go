@@ -6,10 +6,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -64,6 +65,7 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 	ts_authkey := linkdef.Values["ts_authkey"]
 	tls_private_key := linkdef.Values["tls_private_key"]
 	tls_cert := linkdef.Values["tls_cert"]
+
 	if linkdef.Values["funnel"] != "" {
 		funnel, err = strconv.ParseBool(linkdef.Values["funnel"])
 		if err != nil {
@@ -96,7 +98,15 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 		}()
 	}
 
+	tDir, err := os.MkdirTemp(os.TempDir(), "wasmcloud_tsnet_httpserver")
+	if err != nil {
+		return err
+	}
+
+	//	defer os.RemoveAll(tDir)
+
 	s = &tsnet.Server{
+		Dir:      tDir,
 		Hostname: hostname,
 		AuthKey:  ts_authkey,
 		Logf:     logger.Discard,
@@ -146,7 +156,7 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 				headers["X-Webauth-Tailnet"] = httpserver.HeaderValues{who.Node.Name}
 				headers["X-Webauth-Profile-Picture"] = httpserver.HeaderValues{who.UserProfile.ProfilePicURL}
 
-				body, err := ioutil.ReadAll(r.Body)
+				body, err := io.ReadAll(r.Body)
 				if err != nil {
 					w.WriteHeader(500)
 					w.Write([]byte(err.Error()))
