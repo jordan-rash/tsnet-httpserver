@@ -2,7 +2,8 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - env:
+  - binary: tsnet-httpserver
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -12,7 +13,6 @@ builds:
       - amd64
     goarm:
       - "7"
-    binary: '{{ .Arch }}{{ .Arm }}-{{ .Os }}'
     ignore:
       - goos: windows
         goarch: arm
