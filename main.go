@@ -36,6 +36,8 @@ var (
 func main() {
 	var err error
 
+	_ = os.Setenv("HOME", "/tmp")
+
 	p, err = provider.New(
 		"wasmcloud:httpserver",
 		provider.WithNewLinkFunc(handleNewLink),
