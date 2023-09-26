@@ -5,9 +5,9 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/wasmCloud/provider-sdk-go v0.0.0-20230926180712-8c80af58b411
-	github.com/wasmcloud/interfaces/core/tinygo v0.0.0-20221212211611-51d99ad3427c
-	github.com/wasmcloud/interfaces/httpserver/tinygo v0.0.0-20221212211611-51d99ad3427c
+	github.com/wasmCloud/provider-sdk-go v0.0.0-20230926185356-7f8574b87abd
+	github.com/wasmcloud/interfaces/core/tinygo v0.0.0-20230606141907-ea77eb34853a
+	github.com/wasmcloud/interfaces/httpserver/tinygo v0.0.0-20230606141907-ea77eb34853a
 	github.com/wasmcloud/tinygo-msgpack v0.1.4
 	tailscale.com v1.48.2
 )

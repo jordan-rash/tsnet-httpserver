@@ -100,7 +100,12 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 		}()
 	}
 
-	tDir, err := os.MkdirTemp(os.TempDir(), "wasmcloud_tsnet_httpserver")
+	tDir, err := os.MkdirTemp(os.TempDir(), "wasmcloud_tsnet_httpserver_")
+	if err != nil {
+		return err
+	}
+
+	err = os.Setenv("HOME", tDir)
 	if err != nil {
 		return err
 	}
@@ -162,6 +167,7 @@ func handleNewLink(linkdef core.LinkDefinition) error {
 				if err != nil {
 					w.WriteHeader(500)
 					w.Write([]byte(err.Error()))
+					return
 				}
 
 				req := httpserver.HttpRequest{
